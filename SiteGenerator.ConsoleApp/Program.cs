@@ -1,15 +1,37 @@
 ﻿using System;
 using System.IO;
 using HandlebarsDotNet;
+using Nett;
 
 namespace SiteGenerator.ConsoleApp
 {
-    public static class Program
+    public class Config
     {
-        // TODO: Make configurable. Ideally, support something like gcc's -I parameter which can be provided multiple
-        // TODO: times. Perhaps the easiest way is to just make this a setting in config.toml? Yes, that'll
-        // TODO: probably be the case.
-        private const string SourceDir = "src";
+        [TomlMember(Key = "source_dir")]
+        public string SourceDir { get; set; }
+    }
+
+    public class Site
+    {
+        [TomlMember(Key = "title")]
+        public string Title { get; set; }
+    }
+
+    public class TopLevelConfig
+    {
+        [TomlMember(Key = "config")]
+        public Config Config { get; set; }
+
+        [TomlMember(Key = "site")]
+        public Site Site { get; set; }
+    }
+
+    public class Program
+    {
+        private string SourcePath { get; }
+        private string TargetPath { get; }
+        private TopLevelConfig TopLevelConfig { get; }
+        private Config Config => TopLevelConfig.Config;
 
         public static void Main(string[] args)
         {
@@ -19,27 +41,48 @@ namespace SiteGenerator.ConsoleApp
                 Environment.Exit(1);
             }
 
-            string source = File.ReadAllText(args[0]);
+            var config = Toml.ReadFile<TopLevelConfig>("config.toml");
+
+            ValidateConfig(config);
+
+            new Program(args[0], args[1], config)
+                .Run();
+        }
+
+        private static void ValidateConfig(TopLevelConfig config)
+        {
+            // Set default values for config settings which have not been provided
+            config.Config ??= new Config();
+            config.Config.SourceDir ??= "src";
+        }
+
+        private Program(string sourcePath, string targetPath, TopLevelConfig topLevelConfig)
+        {
+            SourcePath = sourcePath;
+            TargetPath = targetPath;
+            TopLevelConfig = topLevelConfig;
+        }
+
+        private void Run()
+        {
+            string source = File.ReadAllText(SourcePath);
 
             Handlebars.RegisterHelper("include", IncludeHelper);
 
             var template = Handlebars.Compile(source);
 
-            var data = new {
-                title = "My new post",
-                body = "This is my first post!",
+            var data = new
+            {
                 now = DateTime.Now,
-                site = new {
-                    Title = "halleluja.nu"
-                }
+                site = TopLevelConfig.Site
             };
 
             var result = template(data);
 
-            File.WriteAllText(args[1], result);
+            File.WriteAllText(TargetPath, result);
         }
 
-        private static void IncludeHelper(TextWriter writer, dynamic context, object[] parameters)
+        private void IncludeHelper(TextWriter writer, dynamic context, object[] parameters)
         {
             if (parameters.Length != 1)
             {
@@ -48,10 +91,11 @@ namespace SiteGenerator.ConsoleApp
 
             if (!(parameters[0] is string fileName))
             {
-                throw new HandlebarsException("{{include}} expected string parameter, not " + parameters[0].GetType().Name);
+                throw new HandlebarsException("{{include}} expected string parameter, not " +
+                                              parameters[0].GetType().Name);
             }
 
-            string templateSource = File.ReadAllText(Path.Join(SourceDir, fileName));
+            string templateSource = File.ReadAllText(Path.Join(Config.SourceDir, fileName));
 
             var template = Handlebars.Compile(templateSource);
             string result = template(context);
