@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using HandlebarsDotNet;
+using Markdig;
 using Nett;
 
 namespace SiteGenerator.ConsoleApp
@@ -68,6 +69,7 @@ namespace SiteGenerator.ConsoleApp
             string source = File.ReadAllText(SourcePath);
 
             Handlebars.RegisterHelper("include", IncludeHelper);
+            Handlebars.RegisterHelper("markdown", MarkdownHelper);
 
             var template = Handlebars.Compile(source);
 
@@ -101,6 +103,16 @@ namespace SiteGenerator.ConsoleApp
             string result = template(context);
 
             writer.WriteSafeString(result);
+        }
+
+        private static void MarkdownHelper(TextWriter writer, HelperOptions options, dynamic context, object[] arguments)
+        {
+            var stringWriter = new StringWriter();
+            options.Template(stringWriter, context);
+
+            string html = Markdown.ToHtml(stringWriter.ToString());
+
+            writer.WriteSafeString(html);
         }
     }
 }
