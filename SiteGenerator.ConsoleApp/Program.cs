@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
+using System.Reflection.Metadata;
 using HandlebarsDotNet;
+using HandlebarsDotNet.Compiler;
 using Markdig;
 using Nett;
 
@@ -70,14 +75,14 @@ namespace SiteGenerator.ConsoleApp
 
             Handlebars.RegisterHelper("include", IncludeHelper);
             Handlebars.RegisterHelper("markdown", MarkdownHelper);
+            Handlebars.RegisterHelper("set", SetHelper);
 
             var template = Handlebars.Compile(source);
 
-            var data = new
-            {
-                now = DateTime.Now,
-                site = TopLevelConfig.Site
-            };
+            var data = new ExpandoObject() as IDictionary<string, object>;
+
+            data.Add("now", DateTime.Now);
+            data.Add("site", TopLevelConfig.Site);
 
             var result = template(data);
 
@@ -113,6 +118,29 @@ namespace SiteGenerator.ConsoleApp
             string html = Markdown.ToHtml(stringWriter.ToString());
 
             writer.WriteSafeString(html);
+        }
+
+        private void SetHelper(TextWriter writer, dynamic dynamicContext, object[] parameters)
+        {
+            var context = (IDictionary<string, object>) dynamicContext;
+
+            if (parameters.Length == 0)
+            {
+                throw new HandlebarsException("{{set}} helper must have at least one argument");
+            }
+
+            foreach (object parameter in parameters)
+            {
+                if (!(parameter is HashParameterDictionary dictionary))
+                {
+                    throw new HandlebarsException("{{set}} parameter must use key=value notation");
+                }
+
+                foreach ((string key, object value) in dictionary)
+                {
+                    context.Add(key, value);
+                }
+            }
         }
     }
 }
