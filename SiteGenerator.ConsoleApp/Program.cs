@@ -3,35 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
-using System.Reflection.Metadata;
 using HandlebarsDotNet;
 using HandlebarsDotNet.Compiler;
 using Markdig;
-using Nett;
+using SiteGenerator.ConsoleApp.Models.Config;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace SiteGenerator.ConsoleApp
 {
-    public class Config
-    {
-        [TomlMember(Key = "source_dir")]
-        public string SourceDir { get; set; }
-    }
-
-    public class Site
-    {
-        [TomlMember(Key = "title")]
-        public string Title { get; set; }
-    }
-
-    public class TopLevelConfig
-    {
-        [TomlMember(Key = "config")]
-        public Config Config { get; set; }
-
-        [TomlMember(Key = "site")]
-        public Site Site { get; set; }
-    }
-
     public class Program
     {
         private string SourcePath { get; }
@@ -47,7 +27,13 @@ namespace SiteGenerator.ConsoleApp
                 Environment.Exit(1);
             }
 
-            var config = Toml.ReadFile<TopLevelConfig>("config.toml");
+            var input = new StringReader(File.ReadAllText("config.yaml"));
+
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .Build();
+
+            var config = deserializer.Deserialize<TopLevelConfig>(input);
 
             ValidateConfig(config);
 
@@ -84,7 +70,7 @@ namespace SiteGenerator.ConsoleApp
             data.Add("now", DateTime.Now);
             data.Add("site", TopLevelConfig.Site);
 
-            var result = template(data);
+            string result = template(data);
 
             File.WriteAllText(TargetPath, result);
         }
@@ -120,7 +106,7 @@ namespace SiteGenerator.ConsoleApp
             writer.WriteSafeString(html);
         }
 
-        private void SetHelper(TextWriter writer, dynamic dynamicContext, object[] parameters)
+        private static void SetHelper(TextWriter writer, dynamic dynamicContext, object[] parameters)
         {
             var context = (IDictionary<string, object>) dynamicContext;
 
