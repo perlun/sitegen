@@ -9,4 +9,12 @@ namespace SiteGenerator.ConsoleApp
         {
         }
     }
+
+    internal class PostFormatException : Exception
+    {
+        public PostFormatException(string message)
+            : base(message)
+        {
+        }
+    }
 }
