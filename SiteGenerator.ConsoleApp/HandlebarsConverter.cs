@@ -14,8 +14,9 @@ namespace SiteGenerator.ConsoleApp
     /// </summary>
     public class HandlebarsConverter
     {
-        private IHandlebars handlebars;
-        private TopLevelConfig topLevelConfig;
+        private readonly IHandlebars handlebars;
+        private readonly TopLevelConfig topLevelConfig;
+
         private Config Config => topLevelConfig.Config;
 
         public HandlebarsConverter(TopLevelConfig topLevelConfig)
@@ -29,7 +30,7 @@ namespace SiteGenerator.ConsoleApp
             handlebars.RegisterHelper("set", SetHelper);
         }
 
-        public string Convert(string source)
+        public string Convert(string source, IDictionary<string,object> extraData = null)
         {
             var template = handlebars.Compile(source);
 
@@ -37,6 +38,11 @@ namespace SiteGenerator.ConsoleApp
 
             data.Add("now", DateTime.Now);
             data.Add("site", topLevelConfig.Site);
+
+            foreach ((string key, object value) in extraData ?? new Dictionary<string, object>())
+            {
+                data.Add(key, value);
+            }
 
             return template(data);
         }
