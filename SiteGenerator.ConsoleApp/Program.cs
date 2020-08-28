@@ -26,39 +26,45 @@ namespace SiteGenerator.ConsoleApp
             TopLevelConfig topLevelConfig = ReadConfig();
             var program = new Program(topLevelConfig);
 
-            if (args[0] == "--post")
+            switch (args[0])
             {
-                var blogPostConverter = new BlogPostConverter(topLevelConfig, program.handlebarsConverter);
+                case "--build":
+                    var start = DateTime.Now;
+                    program.ConvertPosts();
+                    program.ConvertPages();
+                    program.CopyStaticAssets();
+                    var end = DateTime.Now;
 
-                blogPostConverter.ProcessBlogPost(args[1]);
-            }
-            else if (args[0] == "--posts")
-            {
-                // Pass 1: convert all Markdown files to .html
-                var files = Directory.GetFiles(topLevelConfig.Config.PostsDir, "*.md");
-                var posts = program.ConvertPosts(files);
+                    Console.WriteLine($"Done rebuilding site in {(int)(end - start).TotalMilliseconds} ms".PadRight(Console.WindowWidth - 1));
+                    break;
 
-                // Pass 2: generate category listings for all categories used by these posts.
-                program.CreateCategoryPages(posts);
-            }
-            else if (args.Length == 2)
-            {
-                string sourcePath = args[0];
-                string targetPath = args[1];
+                case "--posts":
+                    program.ConvertPosts();
+                    break;
 
-                program.ConvertHandlebarsFile(sourcePath, targetPath);
-            }
-            else
-            {
-                Console.WriteLine(
-                    "Syntax: sitegen --post <src-file> | <src-file> <target-file> | --posts <src-file1> <src-file2> <...>");
-                Environment.Exit(1);
-            }
-        }
+                case "--post":
+                    var blogPostConverter = new BlogPostConverter(topLevelConfig, program.handlebarsConverter);
 
-        private static void LogInfo(string message)
-        {
-            Console.WriteLine($"[{NowWithMillis}] {message}");
+                    blogPostConverter.ProcessBlogPost(args[1]);
+                    break;
+
+                default:
+                    if (args.Length == 2)
+                    {
+                        string sourcePath = args[0];
+                        string targetPath = args[1];
+
+                        program.ConvertHandlebarsFile(sourcePath, targetPath);
+                    }
+                    else
+                    {
+                        Console.WriteLine(
+                            "Syntax: sitegen --build | --posts | --post <src-file> | <src-file> <target-file>");
+                        Environment.Exit(1);
+                    }
+
+                    break;
+            }
         }
 
         private Program(TopLevelConfig topLevelConfig)
@@ -93,6 +99,16 @@ namespace SiteGenerator.ConsoleApp
             config.Config.PostsDir ??= "src/_posts";
         }
 
+        private void ConvertPosts()
+        {
+            // Pass 1: convert all Markdown files to .html
+            var files = Directory.GetFiles(topLevelConfig.Config.PostsDir, "*.md");
+            var posts = ConvertPosts(files);
+
+            // Pass 2: generate category listings for all categories used by these posts.
+            CreateCategoryPages(posts);
+        }
+
         private IEnumerable<PostModel> ConvertPosts(IEnumerable<string> files)
         {
             var posts = new List<PostModel>();
@@ -101,13 +117,91 @@ namespace SiteGenerator.ConsoleApp
 
             foreach (string postSourceFile in files)
             {
-                var post = blogPostConverter.ProcessBlogPost(postSourceFile);
+                PostModel post = blogPostConverter.ProcessBlogPost(postSourceFile);
                 LogInfo($"Converted {postSourceFile} to HTML");
 
                 posts.Add(post);
             }
 
             return posts;
+        }
+
+        private void ConvertPages()
+        {
+            var files = Directory.GetFiles(topLevelConfig.Config.SourceDir, "*.hbs", SearchOption.AllDirectories);
+
+            foreach (string file in files)
+            {
+                // file is e.g. src/sv/om/index.hbs at this stage. Make it be relative from the SourceDir, so that
+                // we can create a similar folder structure in the target dir.
+                string relativePath = MakeRelativePath(file);
+
+                if (relativePath.StartsWith("/_"))
+                {
+                    //_layouts, _includes etc - they should not be included at this stage.
+                    continue;
+                }
+
+                string targetPath = Path.ChangeExtension(
+                    Path.Join(topLevelConfig.Config.OutputDir, relativePath),
+                    ".html"
+                );
+
+                string targetDir = Path.GetDirectoryName(targetPath);
+
+                if (!Directory.Exists(targetDir))
+                {
+                    Directory.CreateDirectory(targetDir);
+                }
+
+                ConvertHandlebarsFile(file, targetPath);
+            }
+        }
+
+        private void CopyStaticAssets()
+        {
+            var files = Directory.GetFiles(topLevelConfig.Config.SourceDir, "*", SearchOption.AllDirectories);
+            var excludedExtensions = new List<string> {
+                ".hbs",
+                ".md"
+            };
+
+            foreach (string file in files)
+            {
+                if (excludedExtensions.Contains(Path.GetExtension(file))) {
+                    continue;
+                }
+
+                // file is e.g. src/js/plugins.js at this stage. Make it be relative from the SourceDir, so that
+                // we can create a similar folder structure in the target dir.
+                string relativePath = MakeRelativePath(file);
+
+                if (relativePath.StartsWith("/_"))
+                {
+                    //_layouts, _includes etc - they should not be included at this stage.
+                    continue;
+                }
+
+                string targetPath = Path.Join(topLevelConfig.Config.OutputDir, relativePath);
+                string targetDir = Path.GetDirectoryName(targetPath);
+
+                if (!Directory.Exists(targetDir))
+                {
+                    Directory.CreateDirectory(targetDir);
+                }
+
+                File.Copy(file, targetPath, overwrite: true);
+                LogDebug($"Copied {file} to {targetPath}");
+            }
+        }
+
+        private string MakeRelativePath(string file)
+        {
+            // The approach below is probably not the best way in the world to do this, but it works for simple,
+            // relative paths and will do for now.
+            return file.StartsWith(topLevelConfig.Config.SourceDir)
+                ? file.Substring(topLevelConfig.Config.SourceDir.Length)
+                : file;
         }
 
         /// <summary>
@@ -131,6 +225,8 @@ namespace SiteGenerator.ConsoleApp
             string result = handlebarsConverter.Convert(source, extraData);
 
             File.WriteAllText(targetPath, result);
+
+            LogInfo($"Converted {sourcePath} to {targetPath}");
         }
 
         private void CreateCategoryPages(IEnumerable<PostModel> allPosts)
@@ -171,6 +267,18 @@ namespace SiteGenerator.ConsoleApp
             string result = handlebarsConverter.Convert(source, extraData);
 
             File.WriteAllText(targetPath, result);
+        }
+
+        private static void LogInfo(string message)
+        {
+            Console.Write($"[{NowWithMillis}] {message}".PadRight(Console.WindowWidth - 1));
+            Console.Write("\r");
+        }
+
+        private static void LogDebug(string message)
+        {
+            Console.Write($"[{NowWithMillis}] {message}".PadRight(Console.WindowWidth - 1));
+            Console.Write("\r");
         }
     }
 }
