@@ -29,13 +29,17 @@ namespace SiteGenerator.ConsoleApp
             switch (args[0])
             {
                 case "--build":
-                    var start = DateTime.Now;
+                    DateTime start = DateTime.Now;
+
                     program.ConvertPosts();
                     program.ConvertPages();
                     program.CopyStaticAssets();
-                    var end = DateTime.Now;
 
-                    Console.WriteLine($"Done rebuilding site in {(int)(end - start).TotalMilliseconds} ms".PadRight(Console.WindowWidth - 1));
+                    DateTime end = DateTime.Now;
+
+                    LogInfo($"Done rebuilding site in {(int)(end - start).TotalMilliseconds} ms");
+                    Console.WriteLine();
+
                     break;
 
                 case "--posts":
@@ -271,14 +275,28 @@ namespace SiteGenerator.ConsoleApp
 
         private static void LogInfo(string message)
         {
-            Console.Write($"[{NowWithMillis}] {message}".PadRight(Console.WindowWidth - 1));
-            Console.Write("\r");
+            if (Console.IsOutputRedirected)
+            {
+                Console.WriteLine($"[{NowWithMillis}] {message}");
+            }
+            else
+            {
+                Console.Write($"[{NowWithMillis}] {message}".PadRight(Console.WindowWidth - 1));
+                Console.Write("\r");
+            }
         }
 
         private static void LogDebug(string message)
         {
-            Console.Write($"[{NowWithMillis}] {message}".PadRight(Console.WindowWidth - 1));
-            Console.Write("\r");
+            if (Console.IsOutputRedirected)
+            {
+                Console.WriteLine($"[{NowWithMillis}] {message}");
+            }
+            else
+            {
+                Console.Write($"[{NowWithMillis}] {message}".PadRight(Console.WindowWidth - 1));
+                Console.Write("\r");
+            }
         }
     }
 }
