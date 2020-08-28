@@ -1,5 +1,9 @@
 # README
 
+## Examples of sites using `sitegen`
+
+- https://github.com/perlun/halleluja.nu
+
 ## Building sitegen
 
 ```shell
