@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using HandlebarsDotNet;
 using SiteGenerator.ConsoleApp.Models;
 using SiteGenerator.ConsoleApp.Models.Config;
 using YamlDotNet.Serialization;
@@ -158,7 +159,18 @@ namespace SiteGenerator.ConsoleApp
                     Directory.CreateDirectory(targetDir);
                 }
 
-                ConvertHandlebarsFile(file, targetPath);
+                try
+                {
+                    ConvertHandlebarsFile(file, targetPath);
+                }
+                catch (HandlebarsParserException e)
+                {
+                    Console.Write(Environment.NewLine + Environment.NewLine);
+
+                    Console.Error.WriteLine($"Error converting {file}. Details:");
+                    Console.Error.Write(e);
+                    return;
+                }
             }
         }
 
