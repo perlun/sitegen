@@ -28,9 +28,10 @@ namespace SiteGenerator.ConsoleApp
             handlebars.RegisterHelper("include", IncludeHelper);
             handlebars.RegisterHelper("markdown", MarkdownHelper);
             handlebars.RegisterHelper("set", SetHelper);
+            handlebars.RegisterHelper("ifeq", IfEqHelper);
         }
 
-        public string Convert(string source, IDictionary<string,object> extraData = null)
+        public string Convert(string source, IDictionary<string, object> extraData = null)
         {
             var template = handlebars.Compile(source);
 
@@ -68,7 +69,8 @@ namespace SiteGenerator.ConsoleApp
             writer.WriteSafeString(result);
         }
 
-        private static void MarkdownHelper(TextWriter writer, HelperOptions options, dynamic context, object[] arguments)
+        private static void MarkdownHelper(TextWriter writer, HelperOptions options, dynamic context,
+            object[] arguments)
         {
             var stringWriter = new StringWriter();
             options.Template(stringWriter, context);
@@ -98,6 +100,44 @@ namespace SiteGenerator.ConsoleApp
                 {
                     context.Add(key, value);
                 }
+            }
+        }
+
+        /// <summary>
+        /// `{{#ifeq}}` block helper.
+        ///
+        /// Use like this:
+        ///
+        /// ```
+        /// {{#ifeq language 'foo'}}
+        /// Content shown if the variable equals 'foo'
+        /// {{/else}}
+        /// Optional content shown if the comparison is not true.
+        /// {{/ifeq}}
+        /// ```
+        /// </summary>
+        /// <param name="output">The TextWriter to write the output to.</param>
+        /// <param name="options">The HelperOptions to use.</param>
+        /// <param name="context">The context, where parameters can have been defined.</param>
+        /// <param name="arguments">The arguments, as provided in the Handlebars source file.</param>
+        /// <exception cref="HandlebarsException">If the number of arguments does not equal two.</exception>
+        private static void IfEqHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        {
+            if (arguments.Length != 2)
+            {
+                throw new HandlebarsException("{{ifeq}} helper must have exactly two arguments");
+            }
+
+            var left = arguments[0] as string;
+            var right = arguments[1] as string;
+
+            if (left == right)
+            {
+                options.Template(output, null);
+            }
+            else
+            {
+                options.Inverse(output, null);
             }
         }
     }
