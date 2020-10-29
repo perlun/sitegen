@@ -21,15 +21,15 @@ namespace SiteGenerator.ConsoleApp
             this.handlebarsConverter = handlebarsConverter;
         }
 
-        public PostModel ProcessBlogPost(string path)
+        public BlogPostModel ProcessBlogPost(string path)
         {
-            PostModel post = ReadBlogPost(path);
-            ConvertToHtml(post);
+            BlogPostModel blogPost = ReadBlogPost(path);
+            ConvertToHtml(blogPost);
 
-            return post;
+            return blogPost;
         }
 
-        public static PostModel ReadBlogPost(string path)
+        public static BlogPostModel ReadBlogPost(string path)
         {
             string blogPostWithFrontmatter = File.ReadAllText(path);
 
@@ -49,24 +49,24 @@ namespace SiteGenerator.ConsoleApp
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
 
-            var post = deserializer.Deserialize<PostModel>(frontmatterYaml);
+            var post = deserializer.Deserialize<BlogPostModel>(frontmatterYaml);
             post.Body = blogPostBody;
             return post;
         }
 
-        private void ConvertToHtml(PostModel post)
+        private void ConvertToHtml(BlogPostModel blogPost)
         {
-            string layout = File.ReadAllText(Path.Join(topLevelConfig.Config.LayoutsDir, post.Layout + ".hbs"));
+            string layout = File.ReadAllText(Path.Join(topLevelConfig.Config.LayoutsDir, blogPost.Layout + ".hbs"));
 
             string result = handlebarsConverter.Convert(layout, new Dictionary<string, object>
             {
-                {"post", post.ToDictionary()}
+                {"post", blogPost.ToDictionary()}
             });
 
-            foreach (string postCategory in post.Categories)
+            foreach (string postCategory in blogPost.Categories)
             {
-                string outputDir = Path.Join(Config.OutputDir, Slugify(postCategory), post.Date.Year.ToString(),
-                    post.Date.Month.ToString(), post.Date.Day.ToString(), Slugify(post.Title));
+                string outputDir = Path.Join(Config.OutputDir, Slugify(postCategory), blogPost.Date.Year.ToString(),
+                    blogPost.Date.Month.ToString(), blogPost.Date.Day.ToString(), Slugify(blogPost.Title));
                 string outputPath = Path.Join(outputDir, "index.html");
 
                 Directory.CreateDirectory(outputDir);

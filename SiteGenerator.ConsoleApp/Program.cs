@@ -38,7 +38,7 @@ namespace SiteGenerator.ConsoleApp
 
                     DateTime end = DateTime.Now;
 
-                    LogInfo($"Done rebuilding site in {(int)(end - start).TotalMilliseconds} ms");
+                    LogInfo($"Done rebuilding site in {(int) (end - start).TotalMilliseconds} ms");
                     Console.WriteLine();
 
                     break;
@@ -114,18 +114,18 @@ namespace SiteGenerator.ConsoleApp
             CreateCategoryPages(posts);
         }
 
-        private IEnumerable<PostModel> ConvertPosts(IEnumerable<string> files)
+        private IEnumerable<BlogPostModel> ConvertPosts(IEnumerable<string> files)
         {
-            var posts = new List<PostModel>();
+            var posts = new List<BlogPostModel>();
 
             var blogPostConverter = new BlogPostConverter(topLevelConfig, handlebarsConverter);
 
             foreach (string postSourceFile in files)
             {
-                PostModel post = blogPostConverter.ProcessBlogPost(postSourceFile);
+                BlogPostModel blogPost = blogPostConverter.ProcessBlogPost(postSourceFile);
                 LogInfo($"Converted {postSourceFile} to HTML");
 
-                posts.Add(post);
+                posts.Add(blogPost);
             }
 
             return posts;
@@ -177,14 +177,16 @@ namespace SiteGenerator.ConsoleApp
         private void CopyStaticAssets()
         {
             var files = Directory.GetFiles(topLevelConfig.Config.SourceDir, "*", SearchOption.AllDirectories);
-            var excludedExtensions = new List<string> {
+            var excludedExtensions = new List<string>
+            {
                 ".hbs",
                 ".md"
             };
 
             foreach (string file in files)
             {
-                if (excludedExtensions.Contains(Path.GetExtension(file))) {
+                if (excludedExtensions.Contains(Path.GetExtension(file)))
+                {
                     continue;
                 }
 
@@ -245,17 +247,17 @@ namespace SiteGenerator.ConsoleApp
             LogInfo($"Converted {sourcePath} to {targetPath}");
         }
 
-        private void CreateCategoryPages(IEnumerable<PostModel> allPosts)
+        private void CreateCategoryPages(IEnumerable<BlogPostModel> allPosts)
         {
-            var postsByCategory = new Dictionary<string, List<PostModel>>();
+            var postsByCategory = new Dictionary<string, List<BlogPostModel>>();
 
-            foreach (PostModel postModel in allPosts)
+            foreach (BlogPostModel postModel in allPosts)
             {
                 foreach (string category in postModel.Categories)
                 {
                     if (!postsByCategory.ContainsKey(category))
                     {
-                        postsByCategory[category] = new List<PostModel>();
+                        postsByCategory[category] = new List<BlogPostModel>();
                     }
 
                     postsByCategory[category].Add(postModel);
@@ -268,15 +270,15 @@ namespace SiteGenerator.ConsoleApp
             }
         }
 
-        private void WriteCategoryPage(string category, List<PostModel> categoryPosts)
+        private void WriteCategoryPage(string category, List<BlogPostModel> categoryPosts)
         {
             string sourcePath = Path.Join(config.LayoutsDir, "category_archive.hbs");
             string targetPath = Path.Join(config.OutputDir, Slugify(category), "index.html");
 
             var extraData = new Dictionary<string, object>
             {
-                {"category_posts", categoryPosts.Select(p => p.ToDictionary())},
-                {"category_name", category}
+                { "category_posts", categoryPosts.Select(p => p.ToDictionary()) },
+                { "category_name", category }
             };
 
             string source = File.ReadAllText(sourcePath);
