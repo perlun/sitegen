@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using SiteGenerator.ConsoleApp.Models;
 using SiteGenerator.ConsoleApp.Models.Config;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using static SiteGenerator.ConsoleApp.UrlUtils;
 
-namespace SiteGenerator.ConsoleApp
+namespace SiteGenerator.ConsoleApp.Services
 {
     public class BlogPostConverter
     {
@@ -24,7 +25,11 @@ namespace SiteGenerator.ConsoleApp
         public BlogPostModel ProcessBlogPost(string path)
         {
             BlogPostModel blogPost = ReadBlogPost(path);
-            ConvertToHtml(blogPost);
+
+            if (blogPost != null)
+            {
+                ConvertToHtml(blogPost);
+            }
 
             return blogPost;
         }
@@ -49,9 +54,20 @@ namespace SiteGenerator.ConsoleApp
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
 
-            var post = deserializer.Deserialize<BlogPostModel>(frontmatterYaml);
-            post.Body = blogPostBody;
-            return post;
+            try
+            {
+                var post = deserializer.Deserialize<BlogPostModel>(frontmatterYaml);
+                post.Body = blogPostBody;
+                return post;
+            }
+            catch (YamlException e)
+            {
+                Console.Write(Environment.NewLine + Environment.NewLine);
+
+                Console.Error.WriteLine($"Error converting {path}. Details:");
+                Console.Error.Write(e);
+                return null;
+            }
         }
 
         private void ConvertToHtml(BlogPostModel blogPost)
@@ -60,13 +76,23 @@ namespace SiteGenerator.ConsoleApp
 
             string result = handlebarsConverter.Convert(layout, new Dictionary<string, object>
             {
-                {"post", blogPost.ToDictionary(topLevelConfig.Config)}
+                { "post", blogPost.ToDictionary(topLevelConfig.Config) }
             });
 
             foreach (string postCategory in blogPost.Categories)
             {
-                string outputDir = Path.Join(Config.OutputDir, Slugify(postCategory), blogPost.Date.Year.ToString(),
-                    blogPost.Date.Month.ToString(), blogPost.Date.Day.ToString(), Slugify(blogPost.Title));
+                string languagePrefix = Config.MultipleLanguages switch
+                {
+                    true => blogPost.Language,
+                    false => ""
+                };
+
+                string outputDir = Path.Join(
+                    Config.OutputDir, languagePrefix, Slugify(postCategory),
+                    blogPost.Date.Year.ToString(), blogPost.Date.Month.ToString(), blogPost.Date.Day.ToString(),
+                    Slugify(blogPost.Title)
+                );
+
                 string outputPath = Path.Join(outputDir, "index.html");
 
                 Directory.CreateDirectory(outputDir);
