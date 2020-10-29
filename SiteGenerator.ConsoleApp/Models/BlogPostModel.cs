@@ -9,8 +9,16 @@ using static SiteGenerator.ConsoleApp.UrlUtils;
 
 namespace SiteGenerator.ConsoleApp.Models
 {
+    /// <summary>
+    /// Representation of an individual blog post, as provided in an individual `.md` file.
+    ///
+    /// The header is the YAML "front matter", as separated by `---` + LF before and after the header fields. Each field
+    /// populates the properties defined in this class.
+    ///
+    /// The final part (after the second `---`) is stored as-is (as raw Markdown) in the `Body` property.
+    /// </summary>
     [UsedImplicitly]
-    public class PostModel
+    public class BlogPostModel
     {
         [UsedImplicitly]
         public string Title { get; set; }
