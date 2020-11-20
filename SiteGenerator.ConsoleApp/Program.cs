@@ -5,6 +5,7 @@ using System.Linq;
 using HandlebarsDotNet;
 using SiteGenerator.ConsoleApp.Models;
 using SiteGenerator.ConsoleApp.Models.Config;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using static SiteGenerator.ConsoleApp.UrlUtils;
@@ -88,10 +89,24 @@ namespace SiteGenerator.ConsoleApp
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
 
-            var config = deserializer.Deserialize<TopLevelConfig>(input);
+            try
+            {
+                var config = deserializer.Deserialize<TopLevelConfig>(input);
 
-            ValidateConfig(config);
-            return config;
+                ValidateConfig(config);
+                return config;
+            }
+            catch (YamlException e)
+            {
+                Console.Write(Environment.NewLine + Environment.NewLine);
+
+                Console.Error.WriteLine($"Error reading config.yaml: {e.Message}");
+                Console.Error.WriteLine(e.InnerException?.Message);
+                Environment.Exit(1);
+
+                // Will never be reached, but must be added because of limitations in the C# language/compiler.
+                return null;
+            }
         }
 
         private static void ValidateConfig(TopLevelConfig config)
