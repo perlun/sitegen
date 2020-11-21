@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
-using Markdig;
+using SiteGenerator.ConsoleApp.Services;
 using YamlDotNet.Serialization;
 using static SiteGenerator.ConsoleApp.UrlUtils;
 
@@ -50,11 +50,11 @@ namespace SiteGenerator.ConsoleApp.Models
             // templates will see.
             return new Dictionary<string, object>
             {
-                {"date", Date.ToString("MMM d, yyyy")},
-                {"date_iso", Date.ToString("yyyy-MM-dd")},
-                {"excerpt", Markdown.ToHtml(Excerpt)},
-                {"title", Title},
-                {"body", Markdown.ToHtml(Body)},
+                { "title", Title },
+                { "date", Date.ToString("MMM d, yyyy") },
+                { "date_iso", Date.ToString("yyyy-MM-dd") },
+                { "body", MarkdownConverter.ToHtml(Body) },
+                { "excerpt", MarkdownConverter.ToHtml(Excerpt) },
 
                 {
                     "link", Path.Join(
