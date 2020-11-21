@@ -6,6 +6,7 @@ using HandlebarsDotNet;
 using HandlebarsDotNet.Compiler;
 using Markdig;
 using SiteGenerator.ConsoleApp.Models.Config;
+using SiteGenerator.ConsoleApp.Services;
 
 namespace SiteGenerator.ConsoleApp
 {
@@ -75,7 +76,7 @@ namespace SiteGenerator.ConsoleApp
             var stringWriter = new StringWriter();
             options.Template(stringWriter, context);
 
-            string html = Markdown.ToHtml(stringWriter.ToString());
+            string html = MarkdownConverter.ToHtml(stringWriter.ToString());
 
             writer.WriteSafeString(html);
         }
