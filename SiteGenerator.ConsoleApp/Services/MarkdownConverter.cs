@@ -1,4 +1,5 @@
 using Markdig;
+using SiteGenerator.ConsoleApp.Models;
 
 namespace SiteGenerator.ConsoleApp.Services
 {
@@ -10,13 +11,18 @@ namespace SiteGenerator.ConsoleApp.Services
         /// This method enables a number of Markdig extensions.
         /// </summary>
         /// <param name="markdown">The Markdown content</param>
+        /// <param name="softLineBreaks">The LineBreaks setting.</param>
         /// <returns>An HTML representation of the given content.</returns>
-        public static string ToHtml(string markdown)
+        public static string ToHtml(string markdown, LineBreaks softLineBreaks)
         {
-            MarkdownPipeline pipeline = new MarkdownPipelineBuilder()
-                //.UseAdvancedExtensions()
-                .UseSoftlineBreakAsHardlineBreak()
-                .Build();
+            MarkdownPipelineBuilder pipelineBuilder = new MarkdownPipelineBuilder().UseAdvancedExtensions();
+
+            if (softLineBreaks == LineBreaks.Hard)
+            {
+                pipelineBuilder.UseSoftlineBreakAsHardlineBreak();
+            }
+
+            MarkdownPipeline pipeline = pipelineBuilder.Build();
 
             return Markdown.ToHtml(markdown, pipeline);
         }

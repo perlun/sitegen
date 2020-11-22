@@ -117,6 +117,10 @@ namespace SiteGenerator.ConsoleApp
             config.Config.LayoutsDir ??= Path.Join(config.Config.SourceDir, "_layouts");
             config.Config.OutputDir ??= "out";
             config.Config.PostsDir ??= "src/_posts";
+
+            // Enabling "soft line breaks as hard" is currently the default. Can be opted out by individual blog posts
+            // as needed.
+            config.Config.LineBreaks ??= LineBreaks.Hard;
         }
 
         private void ConvertPosts()
@@ -247,7 +251,7 @@ namespace SiteGenerator.ConsoleApp
             var blogPosts = Directory.GetFiles(config.PostsDir, "*.md")
                 .Select(BlogPostConverter.ReadBlogPost)
                 .OrderByDescending(p => p.Date)
-                .Select(p => p.ToDictionary());
+                .Select(p => p.ToDictionary(topLevelConfig.Config));
 
             var extraData = new Dictionary<string, object>
             {
@@ -292,7 +296,7 @@ namespace SiteGenerator.ConsoleApp
 
             var extraData = new Dictionary<string, object>
             {
-                { "category_posts", categoryPosts.Select(p => p.ToDictionary()) },
+                { "category_posts", categoryPosts.Select(p => p.ToDictionary(topLevelConfig.Config)) },
                 { "category_name", category }
             };
 

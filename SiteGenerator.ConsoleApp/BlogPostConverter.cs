@@ -60,7 +60,7 @@ namespace SiteGenerator.ConsoleApp
 
             string result = handlebarsConverter.Convert(layout, new Dictionary<string, object>
             {
-                {"post", blogPost.ToDictionary()}
+                {"post", blogPost.ToDictionary(topLevelConfig.Config)}
             });
 
             foreach (string postCategory in blogPost.Categories)
