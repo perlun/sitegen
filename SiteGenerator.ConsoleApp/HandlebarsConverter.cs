@@ -4,7 +4,6 @@ using System.Dynamic;
 using System.IO;
 using HandlebarsDotNet;
 using HandlebarsDotNet.Compiler;
-using Markdig;
 using SiteGenerator.ConsoleApp.Models.Config;
 using SiteGenerator.ConsoleApp.Services;
 
@@ -70,13 +69,13 @@ namespace SiteGenerator.ConsoleApp
             writer.WriteSafeString(result);
         }
 
-        private static void MarkdownHelper(TextWriter writer, HelperOptions options, dynamic context,
+        private void MarkdownHelper(TextWriter writer, HelperOptions options, dynamic context,
             object[] arguments)
         {
             var stringWriter = new StringWriter();
             options.Template(stringWriter, context);
 
-            string html = MarkdownConverter.ToHtml(stringWriter.ToString());
+            string html = MarkdownConverter.ToHtml(stringWriter.ToString(), topLevelConfig.Config.LineBreaks!.Value);
 
             writer.WriteSafeString(html);
         }

@@ -38,13 +38,16 @@ namespace SiteGenerator.ConsoleApp.Models
         [UsedImplicitly]
         public string Language { get; set; }
 
+        [UsedImplicitly]
+        public LineBreaks? LineBreaks { get; set; }
+
         // Ignore this property as it will not be part of the YAML document
         [YamlIgnore]
         public string Body { get; set; }
 
         private string Excerpt => Body.Split(Environment.NewLine + Environment.NewLine, 2).FirstOrDefault();
 
-        public IDictionary<string, object> ToDictionary()
+        public IDictionary<string, object> ToDictionary(Config.Config config)
         {
             // This is the "presentation layer" for this model object. The field names below are what the .hbs
             // templates will see.
@@ -53,8 +56,8 @@ namespace SiteGenerator.ConsoleApp.Models
                 { "title", Title },
                 { "date", Date.ToString("MMM d, yyyy") },
                 { "date_iso", Date.ToString("yyyy-MM-dd") },
-                { "body", MarkdownConverter.ToHtml(Body) },
-                { "excerpt", MarkdownConverter.ToHtml(Excerpt) },
+                { "body", MarkdownConverter.ToHtml(Body, LineBreaks ?? config.LineBreaks!.Value) },
+                { "excerpt", MarkdownConverter.ToHtml(Excerpt, LineBreaks ?? config.LineBreaks!.Value) },
 
                 {
                     "link", Path.Join(
