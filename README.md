@@ -20,6 +20,13 @@ TODO: document this
 - `site` - the `site` section in `config.yaml`
 - `blog_posts` - a list of all blog posts.
 
+## Similar projects
+
+See also the following C#/.NET-based static site generators:
+
+ - https://github.com/krompaco/record-collector - built on top of ASP.NET Core MVC
+ - https://github.com/tomzorz/lastpage - .NET Core static website generator based on Mustachio
+
 ## License
 
 [MIT](LICENSE)
