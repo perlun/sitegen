@@ -32,6 +32,8 @@ namespace SiteGenerator.ConsoleApp
             // We consider certain characters "forbidden" or unsuitable from being used in URLs; we simply strip them
             // out when generating the slugs.
             .Replace("!", "")
-            .Replace("?", "");
+            .Replace("?", "")
+            .Replace(":", "")
+            .Replace("\"", "");
     }
 }
