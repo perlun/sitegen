@@ -5,12 +5,11 @@ using System.IO;
 using HandlebarsDotNet;
 using HandlebarsDotNet.Compiler;
 using SiteGenerator.ConsoleApp.Models.Config;
-using SiteGenerator.ConsoleApp.Services;
 
-namespace SiteGenerator.ConsoleApp
+namespace SiteGenerator.ConsoleApp.Services
 {
     /// <summary>
-    /// Converts Handlebars (.hbs) content to HTML (.html)
+    /// Converts Handlebars (`.hbs`) content to HTML (`.html`)
     /// </summary>
     public class HandlebarsConverter
     {

@@ -5,6 +5,9 @@ using System.Linq;
 using HandlebarsDotNet;
 using SiteGenerator.ConsoleApp.Models;
 using SiteGenerator.ConsoleApp.Models.Config;
+using SiteGenerator.ConsoleApp.Services;
+using SiteGenerator.ConsoleApp.Services.MultiLanguage;
+using SiteGenerator.ConsoleApp.Services.SingleLanguage;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -12,17 +15,39 @@ using static SiteGenerator.ConsoleApp.UrlUtils;
 
 namespace SiteGenerator.ConsoleApp
 {
+    /// <summary>
+    /// Entry-point for `sitegen`. This is the main class, handling parsing of command line parameters and delegating
+    /// the rest of the work to other parts of the application.
+    /// </summary>
     public class Program
     {
         private readonly HandlebarsConverter handlebarsConverter;
         private readonly Config config;
         private readonly TopLevelConfig topLevelConfig;
 
+        private List<BlogPostModel> allBlogPosts;
+        private Dictionary<string, IEnumerable<IDictionary<string, object>>> groupedBlogPosts;
+
         /// <summary>
         /// Returns a string representation of <see cref="DateTime.Now"/>, including milliseconds.
         /// </summary>
         private static string NowWithMillis => DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
 
+        private List<BlogPostModel> AllBlogPosts => allBlogPosts ??=
+            GetBlogPostFiles()
+                .Select(BlogPostConverter.ReadBlogPost)
+                .OrderByDescending(p => p.Date)
+                .ToList();
+
+        private Dictionary<string, IEnumerable<IDictionary<string, object>>> GroupedBlogPosts => groupedBlogPosts ??=
+            AllBlogPosts
+                .GroupBy(bp => bp.Language)
+                .ToDictionary(k => k.Key, v => v.Select(p => p.ToDictionary(config)));
+
+        /// <summary>
+        /// Entry-point. This is the first method that gets called by the .NET runtime.
+        /// </summary>
+        /// <param name="args">An array of command line arguments.</param>
         public static void Main(string[] args)
         {
             TopLevelConfig topLevelConfig = ReadConfig();
@@ -126,11 +151,17 @@ namespace SiteGenerator.ConsoleApp
         private void ConvertPosts()
         {
             // Pass 1: convert all Markdown files to .html
-            var files = Directory.GetFiles(topLevelConfig.Config.PostsDir, "*.md");
+            var files = GetBlogPostFiles();
             var posts = ConvertPosts(files);
 
             // Pass 2: generate category listings for all categories used by these posts.
-            CreateCategoryPages(posts);
+            CategoryPageCreator categoryPageCreator = config.MultipleLanguages switch
+            {
+                true => new MultiLanguageCategoryPageCreator(config, handlebarsConverter),
+                false => new SingleLanguageCategoryPageCreator(config, handlebarsConverter)
+            };
+
+            categoryPageCreator.CreateCategoryPages(posts);
         }
 
         private IEnumerable<BlogPostModel> ConvertPosts(IEnumerable<string> files)
@@ -144,10 +175,18 @@ namespace SiteGenerator.ConsoleApp
                 BlogPostModel blogPost = blogPostConverter.ProcessBlogPost(postSourceFile);
                 LogInfo($"Converted {postSourceFile} to HTML");
 
-                posts.Add(blogPost);
+                if (blogPost != null)
+                {
+                    posts.Add(blogPost);
+                }
             }
 
             return posts;
+        }
+
+        private string[] GetBlogPostFiles()
+        {
+            return Directory.GetFiles(topLevelConfig.Config.PostsDir, "*.md", SearchOption.AllDirectories);
         }
 
         private void ConvertPages()
@@ -248,14 +287,10 @@ namespace SiteGenerator.ConsoleApp
         /// <param name="targetPath">the path to the target .html file</param>
         private void ConvertHandlebarsFile(string sourcePath, string targetPath)
         {
-            var blogPosts = Directory.GetFiles(config.PostsDir, "*.md")
-                .Select(BlogPostConverter.ReadBlogPost)
-                .OrderByDescending(p => p.Date)
-                .Select(p => p.ToDictionary(topLevelConfig.Config));
-
             var extraData = new Dictionary<string, object>
             {
-                {"blog_posts", blogPosts}
+                { "all_blog_posts", AllBlogPosts },
+                { "blog_posts", GroupedBlogPosts }
             };
 
             string source = File.ReadAllText(sourcePath);

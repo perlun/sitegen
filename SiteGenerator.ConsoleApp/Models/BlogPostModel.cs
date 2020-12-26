@@ -49,6 +49,12 @@ namespace SiteGenerator.ConsoleApp.Models
 
         public IDictionary<string, object> ToDictionary(Config.Config config)
         {
+            string languagePrefix = config.MultipleLanguages switch
+            {
+                true => Language,
+                false => ""
+            };
+
             // This is the "presentation layer" for this model object. The field names below are what the .hbs
             // templates will see.
             return new Dictionary<string, object>
@@ -58,10 +64,12 @@ namespace SiteGenerator.ConsoleApp.Models
                 { "date_iso", Date.ToString("yyyy-MM-dd") },
                 { "body", MarkdownConverter.ToHtml(Body, LineBreaks ?? config.LineBreaks!.Value) },
                 { "excerpt", MarkdownConverter.ToHtml(Excerpt, LineBreaks ?? config.LineBreaks!.Value) },
+                { "language", Language },
 
                 {
                     "link", Path.Join(
                         "/",
+                        languagePrefix,
                         Slugify(Categories.First()),
                         Date.Year.ToString(),
                         Date.Month.ToString(),
@@ -73,11 +81,20 @@ namespace SiteGenerator.ConsoleApp.Models
                 {
                     "categories", Categories.Select(c => new Dictionary<string, string>
                     {
-                        {"name", c},
-                        {"slug", Slugify(c)}
+                        { "name", c },
+                        { "slug", Path.Join(languagePrefix, Slugify(c)) }
                     })
                 }
             };
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(Title)}: {Title}, " +
+                   $"{nameof(Date)}: {Date}, " +
+                   $"{nameof(Categories)}: {Categories}, " +
+                   $"{nameof(Language)}: {Language}, " +
+                   $"{nameof(Excerpt)}: {Excerpt}";
         }
     }
 }

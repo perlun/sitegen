@@ -7,5 +7,6 @@ namespace SiteGenerator.ConsoleApp.Models.Config
         public string OutputDir { get; set; }
         public string PostsDir { get; set; }
         public LineBreaks? LineBreaks { get; set; }
+        public bool MultipleLanguages { get; set; }
     }
 }
