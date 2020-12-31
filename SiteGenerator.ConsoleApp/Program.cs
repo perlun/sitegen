@@ -11,7 +11,6 @@ using SiteGenerator.ConsoleApp.Services.SingleLanguage;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using static SiteGenerator.ConsoleApp.UrlUtils;
 
 namespace SiteGenerator.ConsoleApp
 {
@@ -299,46 +298,6 @@ namespace SiteGenerator.ConsoleApp
             File.WriteAllText(targetPath, result);
 
             LogInfo($"Converted {sourcePath} to {targetPath}");
-        }
-
-        private void CreateCategoryPages(IEnumerable<BlogPostModel> allPosts)
-        {
-            var postsByCategory = new Dictionary<string, List<BlogPostModel>>();
-
-            foreach (BlogPostModel postModel in allPosts)
-            {
-                foreach (string category in postModel.Categories)
-                {
-                    if (!postsByCategory.ContainsKey(category))
-                    {
-                        postsByCategory[category] = new List<BlogPostModel>();
-                    }
-
-                    postsByCategory[category].Add(postModel);
-                }
-            }
-
-            foreach ((string category, var categoryPosts) in postsByCategory)
-            {
-                WriteCategoryPage(category, categoryPosts);
-            }
-        }
-
-        private void WriteCategoryPage(string category, List<BlogPostModel> categoryPosts)
-        {
-            string sourcePath = Path.Join(config.LayoutsDir, "category_archive.hbs");
-            string targetPath = Path.Join(config.OutputDir, Slugify(category), "index.html");
-
-            var extraData = new Dictionary<string, object>
-            {
-                { "category_posts", categoryPosts.Select(p => p.ToDictionary(topLevelConfig.Config)) },
-                { "category_name", category }
-            };
-
-            string source = File.ReadAllText(sourcePath);
-            string result = handlebarsConverter.Convert(source, extraData);
-
-            File.WriteAllText(targetPath, result);
         }
 
         private static void LogInfo(string message)
