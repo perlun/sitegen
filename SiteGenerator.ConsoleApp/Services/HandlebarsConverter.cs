@@ -132,11 +132,11 @@ namespace SiteGenerator.ConsoleApp.Services
 
             if (left == right)
             {
-                options.Template(output, null);
+                options.Template(output, context);
             }
             else
             {
-                options.Inverse(output, null);
+                options.Inverse(output, context);
             }
         }
     }
