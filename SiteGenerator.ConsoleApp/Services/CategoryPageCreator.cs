@@ -25,14 +25,19 @@ namespace SiteGenerator.ConsoleApp.Services
         /// <param name="allPosts">An enumerable of blog posts.</param>
         public abstract void CreateCategoryPages(IEnumerable<BlogPostModel> allPosts);
 
-        protected void WriteCategoryPage(string category, List<BlogPostModel> categoryPosts, string targetPath)
+        /// <param name="language">The language being used, or `null` if running in non-multi-language mode.</param>
+        /// <param name="category">The name of the category whose page is being generated.</param>
+        /// <param name="categoryPosts">A list of the posts in this category.</param>
+        /// <param name="targetPath">The path to the output `.html` file.</param>
+        protected void WriteCategoryPage(string language, string category, List<BlogPostModel> categoryPosts, string targetPath)
         {
             string sourcePath = Path.Join(Config.LayoutsDir, "category_archive.hbs");
 
             var extraData = new Dictionary<string, object>
             {
                 { "category_posts", categoryPosts.Select(p => p.ToDictionary(Config)) },
-                { "category_name", category }
+                { "category_name", category },
+                { "language", language }
             };
 
             string source = File.ReadAllText(sourcePath);

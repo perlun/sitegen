@@ -62,7 +62,7 @@ namespace SiteGenerator.ConsoleApp.Services.MultiLanguage
                         "index.html"
                     );
 
-                    WriteCategoryPage(category, categoryPosts, targetPath);
+                    WriteCategoryPage(language, category, categoryPosts, targetPath);
                 }
             }
         }

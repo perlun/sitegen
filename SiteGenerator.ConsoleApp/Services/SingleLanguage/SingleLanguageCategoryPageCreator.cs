@@ -44,7 +44,7 @@ namespace SiteGenerator.ConsoleApp.Services.SingleLanguage
                     "index.html"
                 );
 
-                WriteCategoryPage(category, categoryPosts, targetPath);
+                WriteCategoryPage(null, category, categoryPosts, targetPath);
             }
         }
     }
