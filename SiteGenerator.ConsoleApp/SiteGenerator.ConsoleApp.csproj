@@ -10,7 +10,7 @@
       <PackageReference Include="Handlebars.Net" Version="1.11.5" />
       <PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
       <PackageReference Include="Markdig" Version="0.22.1" />
-      <PackageReference Include="YamlDotNet" Version="8.1.2" />
+      <PackageReference Include="YamlDotNet" Version="9.1.3" />
     </ItemGroup>
 
 </Project>
