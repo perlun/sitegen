@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using HandlebarsDotNet;
-using SiteGenerator.ConsoleApp.Models;
-using SiteGenerator.ConsoleApp.Models.Config;
-using SiteGenerator.ConsoleApp.Services;
-using SiteGenerator.ConsoleApp.Services.MultiLanguage;
-using SiteGenerator.ConsoleApp.Services.SingleLanguage;
+using Sitegen.Models;
+using Sitegen.Models.Config;
+using Sitegen.Services;
+using Sitegen.Services.MultiLanguage;
+using Sitegen.Services.SingleLanguage;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace SiteGenerator.ConsoleApp
+namespace Sitegen
 {
     /// <summary>
     /// Entry-point for `sitegen`. This is the main class, handling parsing of command line parameters and delegating

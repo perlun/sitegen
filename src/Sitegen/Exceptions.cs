@@ -1,6 +1,6 @@
 using System;
 
-namespace SiteGenerator.ConsoleApp
+namespace Sitegen
 {
     internal class ConfigurationException : Exception
     {

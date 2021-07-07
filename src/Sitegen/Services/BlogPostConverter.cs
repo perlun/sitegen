@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using SiteGenerator.ConsoleApp.Models;
-using SiteGenerator.ConsoleApp.Models.Config;
+using Sitegen.Models;
+using Sitegen.Models.Config;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using static SiteGenerator.ConsoleApp.UrlUtils;
+using static Sitegen.UrlUtils;
 
-namespace SiteGenerator.ConsoleApp.Services
+namespace Sitegen.Services
 {
     public class BlogPostConverter
     {

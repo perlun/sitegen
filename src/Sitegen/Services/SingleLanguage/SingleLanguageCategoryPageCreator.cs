@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
-using SiteGenerator.ConsoleApp.Models;
-using SiteGenerator.ConsoleApp.Models.Config;
-using static SiteGenerator.ConsoleApp.UrlUtils;
+using Sitegen.Models;
+using Sitegen.Models.Config;
+using static Sitegen.UrlUtils;
 
-namespace SiteGenerator.ConsoleApp.Services.SingleLanguage
+namespace Sitegen.Services.SingleLanguage
 {
     /// <summary>
     /// Implementation of <see cref="CategoryPageCreator"/> for multi-language scenarios.

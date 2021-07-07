@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace SiteGenerator.ConsoleApp.Models.Config
+namespace Sitegen.Models.Config
 {
     public class Site
     {

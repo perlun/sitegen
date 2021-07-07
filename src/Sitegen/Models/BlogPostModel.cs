@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
-using SiteGenerator.ConsoleApp.Services;
+using Sitegen.Services;
 using YamlDotNet.Serialization;
-using static SiteGenerator.ConsoleApp.UrlUtils;
+using static Sitegen.UrlUtils;
 
-namespace SiteGenerator.ConsoleApp.Models
+namespace Sitegen.Models
 {
     /// <summary>
     /// Representation of an individual blog post, as provided in an individual `.md` file.
