@@ -12,7 +12,19 @@ $ dotnet build
 
 ## `config.yaml` format
 
-TODO: document this
+```yaml
+config:
+  source_dir: src
+  layouts_dir: src/_layouts
+  output_dir: out
+  posts_dir: src/_posts
+  multiple_languages: true
+
+site:
+  title: halleluja.nu
+```
+
+See the [TopLevelConfig](SiteGenerator.ConsoleApp/Models/Config/TopLevelConfig.cs) class for details. YAML keys are converted from `snake_case_` to `PascalCase`, so `source_dir` in the `config.yaml` corresponds to the `SourceDir` property in [TopLevelConfig](SiteGenerator.ConsoleApp/Models/Config/Config.cs) and so forth.
 
 ## Variables available in Handlebars files
 
