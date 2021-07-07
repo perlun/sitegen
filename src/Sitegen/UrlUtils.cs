@@ -1,4 +1,4 @@
-namespace SiteGenerator.ConsoleApp
+namespace Sitegen
 {
     public static class UrlUtils
     {

@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace SiteGenerator.ConsoleApp.Models.Config
+namespace Sitegen.Models.Config
 {
     /// <summary>
     /// Top-level class used when deserializing `config.yaml` files.

@@ -1,7 +1,7 @@
 using Markdig;
-using SiteGenerator.ConsoleApp.Models;
+using Sitegen.Models;
 
-namespace SiteGenerator.ConsoleApp.Services
+namespace Sitegen.Services
 {
     public static class MarkdownConverter
     {

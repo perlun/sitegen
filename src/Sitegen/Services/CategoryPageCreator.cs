@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using SiteGenerator.ConsoleApp.Models;
-using SiteGenerator.ConsoleApp.Models.Config;
+using Sitegen.Models;
+using Sitegen.Models.Config;
 
-namespace SiteGenerator.ConsoleApp.Services
+namespace Sitegen.Services
 {
     internal abstract class CategoryPageCreator
     {

@@ -4,9 +4,9 @@ using System.Dynamic;
 using System.IO;
 using HandlebarsDotNet;
 using HandlebarsDotNet.Compiler;
-using SiteGenerator.ConsoleApp.Models.Config;
+using Sitegen.Models.Config;
 
-namespace SiteGenerator.ConsoleApp.Services
+namespace Sitegen.Services
 {
     /// <summary>
     /// Converts Handlebars (`.hbs`) content to HTML (`.html`)

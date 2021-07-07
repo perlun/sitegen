@@ -1,4 +1,4 @@
-namespace SiteGenerator.ConsoleApp.Models.Config
+namespace Sitegen.Models.Config
 {
     public class Config
     {

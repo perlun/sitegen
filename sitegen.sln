@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiteGenerator.ConsoleApp", "SiteGenerator.ConsoleApp\SiteGenerator.ConsoleApp.csproj", "{A407BBF4-56E2-4720-80B0-D7B4AFD51F35}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sitegen", "src\Sitegen\Sitegen.csproj", "{A407BBF4-56E2-4720-80B0-D7B4AFD51F35}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
