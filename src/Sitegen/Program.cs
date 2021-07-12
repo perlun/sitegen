@@ -49,7 +49,7 @@ namespace Sitegen
         /// <param name="args">An array of command line arguments.</param>
         public static void Main(string[] args)
         {
-            TopLevelConfig topLevelConfig = ReadConfig();
+            TopLevelConfig topLevelConfig = ReadConfig("config.yaml");
             var program = new Program(topLevelConfig);
 
             switch (args[0])
@@ -105,9 +105,9 @@ namespace Sitegen
             this.topLevelConfig = topLevelConfig;
         }
 
-        private static TopLevelConfig ReadConfig()
+        public static TopLevelConfig ReadConfig(string path)
         {
-            var input = new StringReader(File.ReadAllText("config.yaml"));
+            var input = new StringReader(File.ReadAllText(path));
 
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
@@ -116,6 +116,11 @@ namespace Sitegen
             try
             {
                 var config = deserializer.Deserialize<TopLevelConfig>(input);
+
+                // A YAML document without any content (or with content consisting solely of comments) will yield a
+                // 'null' reference at this point. I haven't found this explicitly documented in YamlDotNet, but that's
+                // the semantics I'm currently seeing.
+                config ??= new TopLevelConfig();
 
                 ValidateConfig(config);
                 return config;

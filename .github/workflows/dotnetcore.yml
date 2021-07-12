@@ -16,3 +16,6 @@ jobs:
 
     - name: Build with dotnet
       run: dotnet build --configuration Release
+
+    - name: Run test suite
+      run: dotnet test --configuration Release --logger "console;verbosity=normal"
