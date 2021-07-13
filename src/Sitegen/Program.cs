@@ -8,6 +8,7 @@ using Sitegen.Models.Config;
 using Sitegen.Services;
 using Sitegen.Services.MultiLanguage;
 using Sitegen.Services.SingleLanguage;
+using Sitegen.YamlDotNet;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -107,22 +108,33 @@ namespace Sitegen
 
         public static TopLevelConfig ReadConfig(string path)
         {
+            if (!File.Exists(path))
+            {
+                throw new ConfigurationException($"{path} does not exist");
+            }
+
             var input = new StringReader(File.ReadAllText(path));
 
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .WithSerializationEventSupport()
                 .Build();
 
             try
             {
                 var config = deserializer.Deserialize<TopLevelConfig>(input);
 
-                // A YAML document without any content (or with content consisting solely of comments) will yield a
-                // 'null' reference at this point. I haven't found this explicitly documented in YamlDotNet, but that's
-                // the semantics I'm currently seeing.
-                config ??= new TopLevelConfig();
+                if (config == null)
+                {
+                    // While this logic might seem silly and irrelevant, it does serve a purpose. Empty YAML documents
+                    // will yield a 'null' reference at this point because of how YamlDotNet works. We must have a valid
+                    // non-null object we can use, so why not just instantiate a blank object at this point? If we do,
+                    // our custom deserialization code powered by IDeserialized will not be executed. We choose the
+                    // simple approach and make this an unsupported scenario altogether; it's very unlikely to cause any
+                    // real-world problems anyway.
+                    throw new ConfigurationException("config.yaml does not contain any settings");
+                }
 
-                ValidateConfig(config);
                 return config;
             }
             catch (YamlException e)
@@ -136,20 +148,6 @@ namespace Sitegen
                 // Will never be reached, but must be added because of limitations in the C# language/compiler.
                 return null;
             }
-        }
-
-        private static void ValidateConfig(TopLevelConfig config)
-        {
-            // Set default values for config settings which have not been provided
-            config.Config ??= new Config();
-            config.Config.SourceDir ??= "src";
-            config.Config.LayoutsDir ??= Path.Join(config.Config.SourceDir, "_layouts");
-            config.Config.OutputDir ??= "out";
-            config.Config.PostsDir ??= "src/_posts";
-
-            // Enabling "soft line breaks as hard" is currently the default. Can be opted out by individual blog posts
-            // as needed.
-            config.Config.LineBreaks ??= LineBreaks.Hard;
         }
 
         private void ConvertPosts()
