@@ -2,7 +2,7 @@ using System;
 
 namespace Sitegen
 {
-    internal class ConfigurationException : Exception
+    public class ConfigurationException : Exception
     {
         public ConfigurationException(string message)
             : base(message)
