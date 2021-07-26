@@ -47,17 +47,17 @@ namespace Sitegen.Services
             return template(data);
         }
 
-        private void IncludeHelper(TextWriter writer, dynamic context, object[] parameters)
+        private void IncludeHelper(EncodedTextWriter writer, Context context, Arguments arguments)
         {
-            if (parameters.Length != 1)
+            if (arguments.Length != 1)
             {
                 throw new HandlebarsException("{{include}} helper must have exactly one argument");
             }
 
-            if (!(parameters[0] is string fileName))
+            if (!(arguments[0] is string fileName))
             {
                 throw new HandlebarsException("{{include}} expected string parameter, not " +
-                                              parameters[0].GetType().Name);
+                                              arguments[0].GetType().Name);
             }
 
             string templateSource = File.ReadAllText(Path.Join(Config.SourceDir, fileName));
@@ -68,8 +68,7 @@ namespace Sitegen.Services
             writer.WriteSafeString(result);
         }
 
-        private void MarkdownHelper(TextWriter writer, HelperOptions options, dynamic context,
-            object[] arguments)
+        private void MarkdownHelper(in EncodedTextWriter writer, in HelperOptions options, in Context context, in Arguments arguments)
         {
             var stringWriter = new StringWriter();
             options.Template(stringWriter, context);
@@ -79,25 +78,24 @@ namespace Sitegen.Services
             writer.WriteSafeString(html);
         }
 
-        private static void SetHelper(TextWriter writer, dynamic dynamicContext, object[] parameters)
+        private static void SetHelper(EncodedTextWriter writer, Context context, Arguments arguments)
         {
-            var context = (IDictionary<string, object>) dynamicContext;
-
-            if (parameters.Length == 0)
+            if (arguments.Length == 0)
             {
                 throw new HandlebarsException("{{set}} helper must have at least one argument");
             }
 
-            foreach (object parameter in parameters)
+            foreach (object argument in arguments)
             {
-                if (!(parameter is HashParameterDictionary dictionary))
+                if (!(argument is HashParameterDictionary dictionary))
                 {
                     throw new HandlebarsException("{{set}} parameter must use key=value notation");
                 }
 
                 foreach ((string key, object value) in dictionary)
                 {
-                    context.Add(key, value);
+                    // TODO: figure out how to do this with Handlebars.NET 2.0
+                    //context[key] = value;
                 }
             }
         }
@@ -120,7 +118,7 @@ namespace Sitegen.Services
         /// <param name="context">The context, where parameters can have been defined.</param>
         /// <param name="arguments">The arguments, as provided in the Handlebars source file.</param>
         /// <exception cref="HandlebarsException">If the number of arguments does not equal two.</exception>
-        private static void IfEqHelper(TextWriter output, HelperOptions options, dynamic context, object[] arguments)
+        private static void IfEqHelper(in EncodedTextWriter output, in HelperOptions options, in Context context, in Arguments arguments)
         {
             if (arguments.Length != 2)
             {
