@@ -62,8 +62,8 @@ namespace Sitegen.Models
                 { "title", Title },
                 { "date", Date.ToString("MMM d, yyyy") },
                 { "date_iso", Date.ToString("yyyy-MM-dd") },
-                { "body", MarkdownConverter.ToHtml(Body, LineBreaks ?? config.LineBreaks!.Value) },
-                { "excerpt", MarkdownConverter.ToHtml(Excerpt, LineBreaks ?? config.LineBreaks!.Value) },
+                { "body", MarkdownConverter.ToHtml(Body, LineBreaks ?? config.LineBreaks) },
+                { "excerpt", MarkdownConverter.ToHtml(Excerpt, LineBreaks ?? config.LineBreaks) },
                 { "language", Language },
 
                 {

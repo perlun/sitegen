@@ -74,7 +74,7 @@ namespace Sitegen.Services
             var stringWriter = new StringWriter();
             options.Template(stringWriter, context);
 
-            string html = MarkdownConverter.ToHtml(stringWriter.ToString(), topLevelConfig.Config.LineBreaks!.Value);
+            string html = MarkdownConverter.ToHtml(stringWriter.ToString(), topLevelConfig.Config.LineBreaks);
 
             writer.WriteSafeString(html);
         }

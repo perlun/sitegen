@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sitegen", "src\Sitegen\Sitegen.csproj", "{A407BBF4-56E2-4720-80B0-D7B4AFD51F35}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Sitegen.Tests", "src\Sitegen.Tests\Sitegen.Tests.csproj", "{B260256E-34CF-4ABA-8E55-A1C5FEA9E940}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sitegen.Tests", "src\Sitegen.Tests\Sitegen.Tests.csproj", "{B260256E-34CF-4ABA-8E55-A1C5FEA9E940}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

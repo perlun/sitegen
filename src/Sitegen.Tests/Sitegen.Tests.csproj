@@ -14,6 +14,12 @@
         <Content Include="fixtures\config_with_empty_dictionaries.yaml">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+
+        <None Remove="fixtures\include.hbs" />
+
+        <Content Include="fixtures\include.hbs">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
